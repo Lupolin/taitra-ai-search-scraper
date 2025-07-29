@@ -1,324 +1,181 @@
-# AI 上網統計 RPA
+# AI Tool Search - 自動化資料下載與上傳工具
 
-這是一個自動化的 RPA（Robotic Process Automation）系統，用於從網站下載 AI 上網統計資料並上傳至 SharePoint。
+一個基於 Python 和 Selenium 的自動化工具，用於從網站下載 Excel 檔案並自動上傳到 SharePoint。
 
-## 專案結構
+## 🚀 功能特色
+
+- **自動化瀏覽器操作**: 使用 Chrome 瀏覽器自動化登入和下載
+- **時間區段處理**: 支援按時間區段（每 10 分鐘）下載資料
+- **檔案重新命名**: 自動將下載的檔案重新命名為指定格式
+- **SharePoint 上傳**: 自動將檔案上傳到 SharePoint 指定資料夾
+- **完整日誌記錄**: 詳細的操作日誌，方便追蹤和除錯
+- **錯誤處理**: 完善的錯誤處理和重試機制
+
+## 📁 專案結構
 
 ```
-AI上網統計RPA/
-├── main_download.py             # 主程式：下載階段
-├── main_upload.py               # 主程式：上傳階段
-├── requirements.txt             # 套件清單
-├── .env                         # 機密帳密設定
-├── config.py                    # 網址、資料夾等基本設定
-│
-├── automation/                  # Selenium 操作模組
-│   ├── browser.py               # Chrome driver 設定
-│   ├── login.py                 # 登入邏輯
-│   ├── download_one.py          # 單次時間區段下載操作
-│   └── upload_sharepoint.py     # 上傳至 SharePoint
-│
-├── utils/                       # 輔助工具模組
-│   ├── time_utils.py            # 產生每 10 分鐘的時間區段
-│   ├── file_utils.py            # 檢查下載檔案、命名、確認成功
-│   └── logger.py                # 可選的 log 模組
-│
-└── downloads/                   # 實體下載資料存放區（自動建立）
-    └── 2025-07-23/              # 每日資料夾，內含 60 檔
+ai_tool_search/
+├── automation/           # 自動化模組
+│   ├── browser_chrome.py    # Chrome 瀏覽器管理
+│   ├── login.py             # 網站登入功能
+│   ├── download_excel.py    # Excel 檔案下載
+│   ├── rename_query_file.py # 檔案重新命名
+│   ├── upload_sharepoint.py # SharePoint 上傳
+│   ├── clear_folder.py      # 資料夾清理
+│   └── captcha_solver.py    # 驗證碼處理
+├── utils/               # 工具模組
+│   └── logger.py           # 日誌管理
+├── temp/                # 暫存檔案資料夾
+├── config.py            # 配置檔案
+├── main.py              # 主程式
+├── requirements.txt     # Python 依賴套件
+└── README.md           # 專案說明
 ```
 
-## 功能特色
+## 🛠️ 安裝步驟
 
-- **自動化下載**: 自動從網站下載每 10 分鐘的統計資料
-- **時間區段管理**: 自動產生 144 個時間區段（00:00-23:59）
-- **檔案管理**: 自動整理檔案到日期資料夾
-- **SharePoint 整合**: 自動上傳檔案至 SharePoint
-- **錯誤處理**: 完整的重試機制和錯誤處理
-- **日誌記錄**: 詳細的操作日誌
-- **彈性配置**: 可自訂各種設定參數
-- **瀏覽器模式分離**: RPA 模式使用 temp 資料夾，一般模式使用 Downloads 資料夾
+### 1. 克隆專案
 
-## 安裝需求
+```bash
+git clone <repository-url>
+cd ai_tool_search
+```
 
-### 系統需求
+### 2. 建立虛擬環境
 
-- Python 3.8 或以上
-- Windows 10/11
-- Chrome 瀏覽器
-- 網路連線
+```bash
+python -m venv venv
+```
 
-### Python 套件
+### 3. 啟動虛擬環境
+
+```bash
+# Windows
+venv\Scripts\activate
+
+# macOS/Linux
+source venv/bin/activate
+```
+
+### 4. 安裝依賴套件
 
 ```bash
 pip install -r requirements.txt
 ```
 
-## 設定說明
+### 5. 設定環境變數
 
-### 1. 環境變數設定 (.env)
-
-複製 `.env` 檔案並填入實際的帳密資訊：
+建立 `.env` 檔案並填入以下設定：
 
 ```env
-# 網站登入憑證
-WEBSITE_USERNAME=your_actual_username
-WEBSITE_PASSWORD=your_actual_password
-
-# SharePoint 設定
-SHAREPOINT_SITE_URL=https://your-tenant.sharepoint.com/sites/your-site
-SHAREPOINT_CLIENT_ID=your_client_id
-SHAREPOINT_CLIENT_SECRET=your_client_secret
-SHAREPOINT_TENANT_ID=your_tenant_id
-
-# 下載設定
-DOWNLOAD_FOLDER=downloads
-LOG_LEVEL=INFO
-```
-
-### 2. 配置檔案 (config.py)
-
-根據實際需求修改 `config.py` 中的設定：
-
-```python
 # 網站設定
-WEBSITE_URL = "https://your-statistics-website.com"
-LOGIN_URL = f"{WEBSITE_URL}/login"
-DOWNLOAD_URL = f"{WEBSITE_URL}/download"
+WEBSITE_URL=https://your-website.com
+WEBSITE_USERNAME=your_username
+WEBSITE_PASSWORD=your_password
 
-# 時間設定
-TIME_INTERVAL_MINUTES = 10  # 每10分鐘一個區段
-START_TIME = "00:00"
-END_TIME = "23:59"
+# Graph API 設定 (SharePoint 上傳用)
+GRAPH_API_CLIENT_ID=your_client_id
+GRAPH_API_CLIENT_SECRET=your_client_secret
+GRAPH_API_TENANT_ID=your_tenant_id
+GRAPH_API_DRIVE_ID=your_drive_id
+GRAPH_API_FOLDER_ID=your_folder_id
+
+# Azure OpenAI 設定 (可選)
+AZURE_OPENAI_ENDPOINT=your_openai_endpoint
+AZURE_OPENAI_API_KEY=your_openai_api_key
+AZURE_OPENAI_DEPLOYMENT_NAME=your_deployment_name
 
 # SharePoint 設定
-SHAREPOINT_FOLDER = "AI上網統計"
-SHAREPOINT_FILE_PREFIX = "AI統計_"
+SHAREPOINT_SITE_URL=your_sharepoint_site_url
 ```
 
-## 使用方法
+## 🚀 使用方法
 
-### 瀏覽器模式
-
-系統支援兩種瀏覽器模式：
-
-#### RPA 模式（預設）
-
-- 使用臨時用戶資料目錄
-- 下載檔案到 `temp` 資料夾
-- 適用於自動化操作
-
-```python
-from automation.browser_chrome import BrowserManager
-
-# RPA 模式（預設）
-browser = BrowserManager(headless=False, rpa_mode=True)
-browser.setup_driver()
-```
-
-#### 一般模式
-
-- 使用系統預設用戶資料目錄
-- 下載檔案到系統的 `Downloads` 資料夾
-- 適用於一般瀏覽操作
-
-```python
-from automation.browser_chrome import BrowserManager
-
-# 一般模式
-browser = BrowserManager(headless=False, rpa_mode=False)
-browser.setup_driver()
-```
-
-### 測試瀏覽器模式
+### 基本使用
 
 ```bash
-python test_browser_modes.py
+python main.py
 ```
 
-### 下載階段
+### 功能流程
 
-#### 下載今天的資料
+1. **啟動瀏覽器**: 自動開啟 Chrome 瀏覽器
+2. **網站登入**: 使用設定檔中的帳號密碼登入
+3. **下載資料**: 按時間區段（08:00-18:00，每 10 分鐘）下載 Excel 檔案
+4. **檔案處理**: 自動重新命名下載的檔案
+5. **上傳 SharePoint**: 將檔案上傳到指定的 SharePoint 資料夾
+6. **清理暫存**: 清理暫存檔案和資料夾
 
-```bash
-python main_download.py
-```
+## ⚙️ 配置說明
 
-#### 下載指定日期的資料
+### 時間設定
 
-```bash
-python main_download.py 2025-01-15
-```
+- `START_TIME`: 開始時間 (預設: "08:00")
+- `END_TIME`: 結束時間 (預設: "18:00")
+- `TIME_INTERVAL_MINUTES`: 時間間隔 (預設: 10 分鐘)
 
-### 上傳階段
+### 瀏覽器設定
 
-#### 上傳今天的檔案
+- `BROWSER_HEADLESS`: 是否隱藏瀏覽器視窗 (預設: False)
+- `BROWSER_TIMEOUT`: 瀏覽器操作超時時間 (預設: 30 秒)
+- `DOWNLOAD_TIMEOUT`: 下載超時時間 (預設: 300 秒)
 
-```bash
-python main_upload.py
-```
+### 重試設定
 
-#### 上傳指定日期的檔案
+- `MAX_RETRIES`: 最大重試次數 (預設: 3 次)
+- `RETRY_DELAY`: 重試間隔時間 (預設: 5 秒)
 
-```bash
-python main_upload.py 2025-01-15
-```
+## 📝 日誌記錄
 
-#### 列出 SharePoint 中的檔案
+程式會自動產生詳細的日誌檔案 `rpa.log`，包含：
 
-```bash
-python main_upload.py --list
-```
+- 操作步驟記錄
+- 錯誤訊息
+- 執行時間統計
+- 檔案處理狀態
 
-#### 刪除 SharePoint 中的檔案
-
-```bash
-python main_upload.py --delete filename.xlsx
-```
-
-#### 上傳指定檔案
-
-```bash
-python main_upload.py file1.xlsx file2.xlsx
-```
-
-## 工作流程
-
-### 下載流程
-
-1. 啟動 Chrome 瀏覽器
-2. 自動登入網站
-3. 產生 144 個時間區段（每 10 分鐘）
-4. 逐一下載每個時間區段的資料
-5. 驗證下載的檔案
-6. 整理檔案到日期資料夾
-7. 清理臨時檔案
-
-### 上傳流程
-
-1. 連接到 SharePoint
-2. 掃描指定日期的檔案
-3. 逐一上傳檔案
-4. 記錄上傳結果
-5. 生成上傳報告
-
-## 錯誤處理
-
-### 重試機制
-
-- 下載失敗時自動重試（預設 3 次）
-- 每次重試間隔 5 秒
-- 記錄重試次數和失敗原因
-
-### 錯誤類型
-
-- 網路連線錯誤
-- 登入失敗
-- 檔案下載失敗
-- SharePoint 連線錯誤
-- 檔案格式錯誤
-
-## 日誌系統
-
-### 日誌等級
-
-- DEBUG: 詳細除錯資訊
-- INFO: 一般操作資訊
-- WARNING: 警告訊息
-- ERROR: 錯誤訊息
-- CRITICAL: 嚴重錯誤
-
-### 日誌檔案
-
-- 位置: `rpa.log`
-- 格式: `時間 - 模組 - 等級 - 訊息`
-- 編碼: UTF-8
-
-## 檔案命名規則
-
-### 下載檔案
-
-```
-ai_stats_YYYYMMDD_HHMM-HHMM.xlsx
-```
-
-範例：
-
-```
-ai_stats_20250115_0000-0010.xlsx
-ai_stats_20250115_0010-0020.xlsx
-```
-
-### SharePoint 檔案
-
-```
-AI統計_YYYYMMDD_01_filename.xlsx
-AI統計_YYYYMMDD_02_filename.xlsx
-```
-
-## 監控與維護
-
-### 定期檢查項目
-
-1. 日誌檔案大小
-2. 下載資料夾空間
-3. SharePoint 連線狀態
-4. 網站登入狀態
-
-### 清理作業
-
-- 定期清理舊的日誌檔案
-- 清理下載資料夾中的臨時檔案
-- 備份重要的配置檔案
-
-## 故障排除
+## 🔧 故障排除
 
 ### 常見問題
 
-#### 1. Chrome Driver 錯誤
+1. **Chrome 驅動程式問題**
 
-```bash
-# 重新安裝 webdriver-manager
-pip uninstall webdriver-manager
-pip install webdriver-manager
-```
+   - 確保已安裝最新版本的 Chrome 瀏覽器
+   - 程式會自動下載對應的 ChromeDriver
 
-#### 2. 登入失敗
+2. **登入失敗**
 
-- 檢查 `.env` 檔案中的帳密是否正確
-- 確認網站是否正常運作
-- 檢查網路連線
+   - 檢查 `.env` 檔案中的帳號密碼是否正確
+   - 確認網站 URL 是否可正常存取
 
-#### 3. SharePoint 連線失敗
+3. **下載超時**
 
-- 檢查 SharePoint 設定是否正確
-- 確認應用程式權限
-- 檢查網路連線
+   - 調整 `DOWNLOAD_TIMEOUT` 設定
+   - 檢查網路連線狀況
 
-#### 4. 檔案下載失敗
+4. **SharePoint 上傳失敗**
+   - 確認 Graph API 設定是否正確
+   - 檢查 SharePoint 權限設定
 
-- 檢查下載資料夾權限
-- 確認磁碟空間是否足夠
-- 檢查檔案格式設定
+## 🤝 貢獻指南
 
-## 開發指南
+1. Fork 本專案
+2. 建立功能分支 (`git checkout -b feature/AmazingFeature`)
+3. 提交變更 (`git commit -m 'Add some AmazingFeature'`)
+4. 推送到分支 (`git push origin feature/AmazingFeature`)
+5. 開啟 Pull Request
 
-### 新增功能
+## 📄 授權條款
 
-1. 在適當的模組中新增功能
-2. 更新配置檔案
-3. 新增測試案例
-4. 更新文件
+本專案採用 MIT 授權條款 - 詳見 [LICENSE](LICENSE) 檔案
 
-### 修改設定
+## 📞 聯絡資訊
 
-1. 修改 `config.py` 中的相關設定
-2. 測試修改後的設定
-3. 更新相關文件
+如有問題或建議，請透過以下方式聯絡：
 
-## 授權
+- 建立 Issue
+- 發送 Email
 
-本專案僅供內部使用，請勿外流。
+---
 
-## 聯絡資訊
-
-如有問題或建議，請聯絡開發團隊。
+**注意**: 使用前請確保已正確設定所有必要的環境變數，並確認相關服務的存取權限。
