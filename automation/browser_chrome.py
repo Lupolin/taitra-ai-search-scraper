@@ -12,9 +12,10 @@ import os
 _global_browser = None
 
 class BrowserManager:
-    def __init__(self, headless=None):
+    def __init__(self, headless=None, rpa_mode=True):
         self.driver = None
         self.headless = headless if headless is not None else config.BROWSER_HEADLESS
+        self.rpa_mode = rpa_mode  # 新增 RPA 模式參數
         
     def setup_driver(self):
         try:
@@ -34,17 +35,23 @@ class BrowserManager:
             chrome_options.add_experimental_option("excludeSwitches", ["enable-automation"])
             chrome_options.add_experimental_option('useAutomationExtension', False)
             
-            # # 使用現有的 Chrome 使用者資料夾（保留登入狀態）
-            # chrome_options.add_argument("--user-data-dir=C:\\Users\\E100\\AppData\\Local\\Google\\Chrome\\User Data")
-            # chrome_options.add_argument("--profile-directory=Default")
-            # 使用臨時用戶資料目錄避免衝突
-            import tempfile
-            temp_dir = tempfile.mkdtemp()
-            chrome_options.add_argument(f"--user-data-dir={temp_dir}")
+            # 根據 RPA 模式決定用戶資料目錄和下載資料夾
+            if self.rpa_mode:
+                # RPA 模式：使用臨時用戶資料目錄和下載到 temp
+                import tempfile
+                temp_dir = tempfile.mkdtemp()
+                chrome_options.add_argument(f"--user-data-dir={temp_dir}")
+                download_folder = config.DOWNLOAD_FOLDER
+                print(f"RPA 模式：使用臨時用戶資料目錄，下載到 {download_folder}")
+            else:
+                # 一般模式：使用預設用戶資料目錄和下載到 Downloads
+                # 不設定 --user-data-dir，使用系統預設
+                download_folder = os.path.expanduser("~/Downloads")  # 使用系統預設的 Downloads 資料夾
+                print(f"一般模式：使用預設用戶資料目錄，下載到 {download_folder}")
             
             # 下載設定
             prefs = {
-                "download.default_directory": config.DOWNLOAD_FOLDER,
+                "download.default_directory": download_folder,
                 "download.prompt_for_download": False,
                 "download.directory_upgrade": True,
                 "safebrowsing.enabled": True

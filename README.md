@@ -36,6 +36,7 @@ AI上網統計RPA/
 - **錯誤處理**: 完整的重試機制和錯誤處理
 - **日誌記錄**: 詳細的操作日誌
 - **彈性配置**: 可自訂各種設定參數
+- **瀏覽器模式分離**: RPA 模式使用 temp 資料夾，一般模式使用 Downloads 資料夾
 
 ## 安裝需求
 
@@ -95,6 +96,44 @@ SHAREPOINT_FILE_PREFIX = "AI統計_"
 ```
 
 ## 使用方法
+
+### 瀏覽器模式
+
+系統支援兩種瀏覽器模式：
+
+#### RPA 模式（預設）
+
+- 使用臨時用戶資料目錄
+- 下載檔案到 `temp` 資料夾
+- 適用於自動化操作
+
+```python
+from automation.browser_chrome import BrowserManager
+
+# RPA 模式（預設）
+browser = BrowserManager(headless=False, rpa_mode=True)
+browser.setup_driver()
+```
+
+#### 一般模式
+
+- 使用系統預設用戶資料目錄
+- 下載檔案到系統的 `Downloads` 資料夾
+- 適用於一般瀏覽操作
+
+```python
+from automation.browser_chrome import BrowserManager
+
+# 一般模式
+browser = BrowserManager(headless=False, rpa_mode=False)
+browser.setup_driver()
+```
+
+### 測試瀏覽器模式
+
+```bash
+python test_browser_modes.py
+```
 
 ### 下載階段
 

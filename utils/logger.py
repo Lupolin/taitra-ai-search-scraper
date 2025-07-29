@@ -52,6 +52,14 @@ class RPALogger:
         console_handler.setFormatter(formatter)
         self.logger.addHandler(console_handler)
     
+    def __str__(self):
+        """字串表示"""
+        return f"RPALogger({self.name})"
+    
+    def __format__(self, format_spec):
+        """格式化方法"""
+        return self.__str__()
+    
     def info(self, message):
         """記錄資訊訊息"""
         self.logger.info(message)
@@ -178,7 +186,7 @@ def log_function_call(func_name, *args, **kwargs):
                 logger.debug(f"函數 {func_name} 執行成功")
                 return result
             except Exception as e:
-                logger.error(f"函數 {func_name} 執行失敗: {e}")
+                logger.error(f"函數 {func_name} 執行失敗: {str(e)}")
                 raise
         return wrapper
     return decorator
@@ -205,7 +213,7 @@ def log_execution_time(func_name):
             except Exception as e:
                 end_time = datetime.now()
                 execution_time = (end_time - start_time).total_seconds()
-                logger.error(f"執行失敗: {func_name} (耗時: {execution_time:.2f} 秒) - {e}")
+                logger.error(f"執行失敗: {func_name} (耗時: {execution_time:.2f} 秒) - {str(e)}")
                 raise
         return wrapper
     return decorator 

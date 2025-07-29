@@ -167,13 +167,6 @@ rpa.log
 .cache/
 cache/
 
-# Config containing credentials or tokens
-config.py
-
-# ================================
-# ✅ Environment file handling
-# ================================
-
 # Ignore actual .env, but allow tracking example
 .env
 !.env.example

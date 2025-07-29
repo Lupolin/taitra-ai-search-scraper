@@ -51,5 +51,5 @@ def login(driver, username, password, logger=None):
         login_btn.click()
         return True
     except Exception as e:
-        logger.error(f"登入流程發生錯誤: {e}")
+        logger.error(f"登入流程發生錯誤: {str(e)}")
         return False
