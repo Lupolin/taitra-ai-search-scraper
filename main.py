@@ -1,9 +1,10 @@
-from automation.browser_chrome import BrowserManager, set_global_browser, close_global_browser
+from automation import (
+    BrowserManager, set_global_browser, close_global_browser,
+    login, download_excel, upload_temp_files_to_sharepoint,
+    clear_temp_folder, report_download_status
+)
 from utils.logger import setup_logging
-from automation.login import login
-from automation.download_excel import download_excel
-from automation.upload_sharepoint import upload_temp_files_to_sharepoint
-from automation.clear_folder import clear_temp_folder
+from utils.execution_logger import execution_logger
 import time
 import config
 
@@ -49,9 +50,36 @@ if __name__ == "__main__":
 
         logger.info("✓ 所有時間區段處理完畢，關閉瀏覽器...")
         close_global_browser()
-        upload_temp_files_to_sharepoint(logger)
-        logger.info("✓ 上傳流程完成")
-        clear_temp_folder()
-        logger.info("✓ 清除 temp 資料夾完成")
+        
+        # 上傳到 SharePoint
+        try:
+            upload_result = upload_temp_files_to_sharepoint(logger)
+            logger.info("✓ 上傳流程完成")
+        except Exception as e:
+            logger.error(f"❌ 上傳流程失敗: {str(e)}")
+        
+        # 發送結果到 Teams
+        try:
+            report_download_status()
+            logger.info("✓ 發送結果到 Teams 完成")
+        except Exception as e:
+            logger.error(f"❌ Teams 通知失敗: {str(e)}")
+        
+        # 清除 temp 資料夾
+        try:
+            clear_temp_folder()
+            logger.info("✓ 清除 temp 資料夾完成")
+        except Exception as e:
+            logger.error(f"❌ 清除 temp 資料夾失敗: {str(e)}")
+        
+        # 輸出執行摘要
+        summary = execution_logger.get_summary_text()
+        stats = execution_logger.get_statistics()
+        
+        logger.info("=" * 50)
+        logger.info("📊 執行摘要:")
+        logger.info(summary)
+        logger.info(f"📈 統計: 總計 {stats['total']} 個區段，成功 {stats['success']} 個，失敗 {stats['failed']} 個")
+        logger.info("=" * 50)
     else:
         logger.error("❌ 無法啟動瀏覽器！")

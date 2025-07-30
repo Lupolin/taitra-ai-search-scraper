@@ -39,6 +39,9 @@ END_TIME = "18:00"
 # SharePoint 設定
 SHAREPOINT_SITE_URL = os.getenv('SHAREPOINT_SITE_URL')
 
+# Power Automate 設定
+POWER_AUTOMATE_WEBHOOK_URL = os.getenv('POWER_AUTOMATE_WEBHOOK_URL')
+
 # 瀏覽器設定
 BROWSER_HEADLESS = False  # 設為 True 可隱藏瀏覽器視窗
 BROWSER_TIMEOUT = 30
