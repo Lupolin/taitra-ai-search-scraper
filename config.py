@@ -35,7 +35,7 @@ DOWNLOAD_FOLDER = os.path.join(BASE_DIR, "temp")
 START_HOUR = 8  # 開始小時
 END_HOUR = 8   # 結束小時
 START_MINUTE = 0  # 開始分鐘
-END_MINUTE = 60  # 結束分鐘
+END_MINUTE = 10  # 結束分鐘
 TIME_INTERVAL_MINUTES = 10  # 每10分鐘一個區段
 
 

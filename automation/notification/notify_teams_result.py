@@ -13,7 +13,7 @@ def generate_expected_filenames() -> list[str]:
             start_str = f"{hour:02d}{start_min:02d}"
             end_str = f"{hour:02d}{end_min:02d}"
             interval = f"{start_str}-{end_str}"
-            filename = f"logger_url_{yesterday}_{interval}.csv"
+            filename = f"logger_urlLog_{yesterday}_{interval}.csv"
             filenames.append(filename)
     return filenames
 
