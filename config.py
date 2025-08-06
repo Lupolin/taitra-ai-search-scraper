@@ -32,9 +32,12 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DOWNLOAD_FOLDER = os.path.join(BASE_DIR, "temp")
 
 # 時間設定
+START_HOUR = 8  # 開始小時
+END_HOUR = 8   # 結束小時
+START_MINUTE = 0  # 開始分鐘
+END_MINUTE = 60  # 結束分鐘
 TIME_INTERVAL_MINUTES = 10  # 每10分鐘一個區段
-START_TIME = "08:00"
-END_TIME = "18:00"
+
 
 # SharePoint 設定
 SHAREPOINT_SITE_URL = os.getenv('SHAREPOINT_SITE_URL')
@@ -44,12 +47,9 @@ POWER_AUTOMATE_WEBHOOK_URL = os.getenv('POWER_AUTOMATE_WEBHOOK_URL')
 
 # 瀏覽器設定
 BROWSER_HEADLESS = False  # 設為 True 可隱藏瀏覽器視窗
-BROWSER_TIMEOUT = 30
+BROWSER_TIMEOUT = 30  # 瀏覽器隱含等待時間（秒）
 DOWNLOAD_TIMEOUT = 300  # 5分鐘下載超時
 
-# 重試設定
-MAX_RETRIES = 3
-RETRY_DELAY = 5  # 秒
 
 # 日誌設定
 LOG_LEVEL = "INFO"

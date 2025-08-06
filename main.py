@@ -8,7 +8,7 @@ from utils.execution_logger import execution_logger
 import time
 import config
 
-def chrome_simple():
+def chrome_simple(logger):
     logger.info("開啟 Chrome 瀏覽器...")
     
     try:
@@ -31,55 +31,55 @@ def chrome_simple():
         return None
 
 if __name__ == "__main__":
-    logger = setup_logging("啟動瀏覽器")
-    browser = chrome_simple()
+    # 啟動瀏覽器
+    browser_logger = setup_logging("啟動瀏覽器")
+    browser = chrome_simple(browser_logger)
 
     if browser:
-        logger = setup_logging("登入網頁")
+        # 登入網頁
+        login_logger = setup_logging("登入網頁")
         login(browser.driver, config.WEBSITE_USERNAME, config.WEBSITE_PASSWORD)
 
-        logger = setup_logging("下載流程開始")
-
-        # 設定時間區段：08:00 到 18:59，每 10 分鐘一組
-        for hour in range(8, 9):  # 8 to 18
-            for minute in range(0, 60, 10):  # 0, 10, 20, ..., 50
-                success = download_excel(browser.driver, hour, minute, minute + 9, logger)
+        # 下載流程
+        download_logger = setup_logging("下載流程")
+        
+        # 設定時間區段：使用 config 中的時間設定
+        for hour in range(config.START_HOUR, config.END_HOUR + 1):
+            for minute in range(config.START_MINUTE, config.END_MINUTE, config.TIME_INTERVAL_MINUTES):
+                success = download_excel(browser.driver, hour, minute, minute + 9, download_logger)
                 if not success:
-                    logger.warning(f"⚠️ 時段 {hour}:{minute:02} ~ {hour}:{minute+9:02} 處理失敗")
+                    download_logger.warning(f"⚠️ 時段 {hour}:{minute:02} ~ {hour}:{minute+9:02} 處理失敗")
                 time.sleep(2)
 
-        logger.info("✓ 所有時間區段處理完畢，關閉瀏覽器...")
+        download_logger.info("✓ 所有時間區段處理完畢，關閉瀏覽器...")
         close_global_browser()
         
         # 上傳到 SharePoint
+        upload_logger = setup_logging("上傳到 SharePoint")
         try:
-            upload_result = upload_temp_files_to_sharepoint(logger)
-            logger.info("✓ 上傳流程完成")
+            upload_result = upload_temp_files_to_sharepoint(upload_logger)
+            upload_logger.info("✓ 上傳流程完成")
         except Exception as e:
-            logger.error(f"❌ 上傳流程失敗: {str(e)}")
+            upload_logger.error(f"❌ 上傳流程失敗: {str(e)}")
         
         # 發送結果到 Teams
+        teams_logger = setup_logging("發送結果到 Teams")
         try:
             report_download_status()
-            logger.info("✓ 發送結果到 Teams 完成")
+            teams_logger.info("✓ 發送結果到 Teams 完成")
         except Exception as e:
-            logger.error(f"❌ Teams 通知失敗: {str(e)}")
-        
-        # 清除 temp 資料夾
-        try:
-            clear_temp_folder()
-            logger.info("✓ 清除 temp 資料夾完成")
-        except Exception as e:
-            logger.error(f"❌ 清除 temp 資料夾失敗: {str(e)}")
+            teams_logger.error(f"❌ Teams 通知失敗: {str(e)}")
         
         # 輸出執行摘要
         summary = execution_logger.get_summary_text()
         stats = execution_logger.get_statistics()
         
-        logger.info("=" * 50)
-        logger.info("📊 執行摘要:")
-        logger.info(summary)
-        logger.info(f"📈 統計: 總計 {stats['total']} 個區段，成功 {stats['success']} 個，失敗 {stats['failed']} 個")
-        logger.info("=" * 50)
+        # 清除 temp 資料夾
+        cleanup_logger = setup_logging("清除 temp 資料夾")
+        try:
+            clear_temp_folder()
+            cleanup_logger.info("✓ 清除 temp 資料夾完成")
+        except Exception as e:
+            cleanup_logger.error(f"❌ 清除 temp 資料夾失敗: {str(e)}")
     else:
-        logger.error("❌ 無法啟動瀏覽器！")
+        browser_logger.error("❌ 無法啟動瀏覽器！")

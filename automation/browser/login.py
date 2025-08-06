@@ -2,7 +2,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 import config
-from automation.captcha_solver import solve_captcha_from_element
+from ..utils.captcha_solver import solve_captcha_from_element
 import logging
 
 def login(driver, username, password, logger=None):

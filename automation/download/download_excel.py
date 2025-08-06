@@ -2,7 +2,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from datetime import datetime, timedelta
-from automation.rename_query_file import rename_query_file
+from .rename_query_file import rename_query_file
 import logging
 import time
 import config
@@ -102,7 +102,7 @@ def download_excel(driver, hour, start_minute, end_minute, logger=None):
                 break
 
         # ✅ 等待「Download File」的連結出現並點擊
-        download_link = WebDriverWait(driver, 300).until(
+        download_link = WebDriverWait(driver, config.DOWNLOAD_TIMEOUT).until(
             EC.element_to_be_clickable((By.PARTIAL_LINK_TEXT, "Download File"))
         )
         download_link.click()

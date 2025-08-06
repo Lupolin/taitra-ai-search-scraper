@@ -35,7 +35,7 @@ def upload_file(file_path, file_name, token, logger):
         logger.error(f"❌ 上傳失敗 {file_name}: {e}")
         return False
 
-def scan_files(folder, patterns=["*.xls", "*.xlsx"]):
+def scan_files(folder, patterns=["*.csv"]):
     """掃描指定資料夾中符合格式的檔案"""
     files = []
     for pattern in patterns:

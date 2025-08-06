@@ -28,29 +28,28 @@ class RPALogger:
         self.logger = logging.getLogger(name)
         self.logger.setLevel(getattr(logging, self.log_level.upper()))
         
-        # 清除現有的 handlers
-        self.logger.handlers.clear()
-        
-        # 設定格式
-        formatter = logging.Formatter(config.LOG_FORMAT)
-        
-        # 檔案 handler
-        if self.log_file:
-            # 確保日誌目錄存在
-            log_dir = os.path.dirname(self.log_file)
-            if log_dir and not os.path.exists(log_dir):
-                os.makedirs(log_dir)
+        # 清除現有的 handlers（避免重複）
+        if not self.logger.handlers:
+            # 設定格式
+            formatter = logging.Formatter(config.LOG_FORMAT)
             
-            file_handler = logging.FileHandler(self.log_file, encoding='utf-8')
-            file_handler.setLevel(getattr(logging, self.log_level.upper()))
-            file_handler.setFormatter(formatter)
-            self.logger.addHandler(file_handler)
-        
-        # 控制台 handler
-        console_handler = logging.StreamHandler()
-        console_handler.setLevel(getattr(logging, self.log_level.upper()))
-        console_handler.setFormatter(formatter)
-        self.logger.addHandler(console_handler)
+            # 檔案 handler
+            if self.log_file:
+                # 確保日誌目錄存在
+                log_dir = os.path.dirname(self.log_file)
+                if log_dir and not os.path.exists(log_dir):
+                    os.makedirs(log_dir)
+                
+                file_handler = logging.FileHandler(self.log_file, encoding='utf-8')
+                file_handler.setLevel(getattr(logging, self.log_level.upper()))
+                file_handler.setFormatter(formatter)
+                self.logger.addHandler(file_handler)
+            
+            # 控制台 handler
+            console_handler = logging.StreamHandler()
+            console_handler.setLevel(getattr(logging, self.log_level.upper()))
+            console_handler.setFormatter(formatter)
+            self.logger.addHandler(console_handler)
     
     def __str__(self):
         """字串表示"""
@@ -134,8 +133,8 @@ class RPALogger:
         self.info(f"檔案格式: {config.FILE_EXTENSION}")
         self.info(f"SharePoint 資料夾: {config.SHAREPOINT_FOLDER}")
 
-# 全域日誌實例
-_logger = None
+# 日誌實例快取
+_loggers = {}
 
 def get_logger(name="RPA", log_file=None, log_level=None):
     """
@@ -149,10 +148,10 @@ def get_logger(name="RPA", log_file=None, log_level=None):
     Returns:
         RPALogger: 日誌實例
     """
-    global _logger
-    if _logger is None:
-        _logger = RPALogger(name, log_file, log_level)
-    return _logger
+    global _loggers
+    if name not in _loggers:
+        _loggers[name] = RPALogger(name, log_file, log_level)
+    return _loggers[name]
 
 def setup_logging(name="RPA", log_file=None, log_level=None):
     """

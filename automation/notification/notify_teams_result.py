@@ -13,7 +13,7 @@ def generate_expected_filenames() -> list[str]:
             start_str = f"{hour:02d}{start_min:02d}"
             end_str = f"{hour:02d}{end_min:02d}"
             interval = f"{start_str}-{end_str}"
-            filename = f"logger_url_{yesterday}_{interval}.xls"
+            filename = f"logger_url_{yesterday}_{interval}.csv"
             filenames.append(filename)
     return filenames
 
@@ -32,7 +32,7 @@ def check_download_files() -> str:
 
     for filename in expected_files:
         full_path = os.path.join(download_folder, filename)
-        interval = filename.replace(".xls", "")
+        interval = filename.replace(".csv", "")
         exists = os.path.exists(full_path)
         status = "✅" if exists else "❌"
         lines.append(f"{interval}-{status}")
