@@ -12,6 +12,14 @@ def download_excel(driver, hour, start_minute, end_minute, logger=None):
         logger = logging.getLogger(__name__)
 
     try:
+        # 檢查瀏覽器 session 是否有效
+        try:
+            driver.current_url
+            logger.info("✅ 瀏覽器 session 有效")
+        except Exception as e:
+            logger.error(f"❌ 瀏覽器 session 無效：{e}")
+            return False
+        
         wait = WebDriverWait(driver, 10)
         logger.info(f"⏱ 開始下載：{hour}:{start_minute:02} 到 {hour}:{end_minute:02}")
 
@@ -112,6 +120,10 @@ def download_excel(driver, hour, start_minute, end_minute, logger=None):
         driver.close()
         driver.switch_to.window(original_window)
         logger.info("🔄 關閉下載 Tab 並切回原本頁面")
+        
+        # 等待檔案下載完成
+        time.sleep(5)  # 給檔案下載 5 秒時間
+        
         date = (datetime.today() - timedelta(days=1)).strftime("%Y%m%d")
         rename_query_file(driver, date, hour, start_minute, end_minute, logger)
         return True

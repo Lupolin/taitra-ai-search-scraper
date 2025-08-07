@@ -88,6 +88,14 @@ def convert_xls_to_csv_trimmed(xls_file, output_csv_file, logger=None):
             logger.error(f"❌ 轉換失敗：{e}")
         else:
             print(f"❌ 轉換失敗：{e}")
+        
+        # 清理 Excel 程序
+        try:
+            if 'excel' in locals():
+                excel.Quit()
+        except:
+            pass
+        
         return False
 
 def rename_query_file(driver, date, hour, start_minute, end_minute, logger=None):

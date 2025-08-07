@@ -49,6 +49,32 @@ if __name__ == "__main__":
                 success = download_excel(browser.driver, hour, minute, minute + 9, download_logger)
                 if not success:
                     download_logger.warning(f"⚠️ 時段 {hour}:{minute:02} ~ {hour}:{minute+9:02} 處理失敗")
+                    
+                    # 檢查是否需要重新啟動瀏覽器
+                    try:
+                        browser.driver.current_url
+                        download_logger.info("✅ 瀏覽器 session 仍然有效，繼續下一個時段")
+                    except Exception as e:
+                        download_logger.error(f"❌ 瀏覽器 session 已失效：{e}")
+                        download_logger.info("🔄 嘗試重新啟動瀏覽器...")
+                        
+                        try:
+                            # 關閉舊瀏覽器
+                            close_global_browser()
+                            
+                            # 重新啟動瀏覽器
+                            browser = chrome_simple(browser_logger)
+                            if browser:
+                                # 重新登入
+                                login(browser.driver, config.WEBSITE_USERNAME, config.WEBSITE_PASSWORD)
+                                download_logger.info("✅ 瀏覽器重新啟動成功")
+                            else:
+                                download_logger.error("❌ 無法重新啟動瀏覽器，跳過剩餘時段")
+                                break
+                        except Exception as restart_error:
+                            download_logger.error(f"❌ 重新啟動瀏覽器失敗：{restart_error}")
+                            break
+                
                 time.sleep(2)
 
         download_logger.info("✓ 所有時間區段處理完畢，關閉瀏覽器...")
